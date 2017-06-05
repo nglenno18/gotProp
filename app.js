@@ -6,7 +6,9 @@ const port = process.env.PORT || 3001;
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var timestamps = [];
+
+
+var records = [];
 require('./config/config.js');
 var app = express();
 var server = http.createServer(app);
@@ -64,9 +66,12 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
-
+  app.get('/records', function(err, res){
+    res.status(200).send(`${records}`);
+  });
   app.post('/', function(req, res){
     const body = req.body.Body;
+    records.push(body);
     console.log(body);
     res.set('Content-Type', 'text/plain');
     res.send(`You sent: ${body} to gotProperties-Rent.com`);

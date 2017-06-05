@@ -64,11 +64,11 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
-  app.post('/', function(req, res){
+  app.post('/posting', function(req, res){
     const body = req.body.Body;
     records.push(body);
-    console.log(body);
-    res.set('Content-Type', 'text/plain');
+    // console.log(body);
+    // res.set('Content-Type', 'text/plain');
     res.send(`You sent: ${body} to gotProperties-Rent.com`);
   });
 

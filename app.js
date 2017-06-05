@@ -66,9 +66,6 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
-  app.get('/records', function(err, res){
-    res.status(200).send(`${records}`);
-  });
   app.post('/', function(req, res){
     const body = req.body.Body;
     records.push(body);
@@ -76,6 +73,14 @@ var serv = app.listen(port, function(){
     res.set('Content-Type', 'text/plain');
     res.send(`You sent: ${body} to gotProperties-Rent.com`);
   });
+
+  app.get('/records', function(err, res){
+    res.status(200).send(`${records}`);
+  });
+  app.get('/', function(err, res){
+    res.status(200).send(`${records}`);
+  });
+
 
 });
 

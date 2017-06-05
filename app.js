@@ -51,8 +51,6 @@ var socks_options = {
   pass: password
 };
 
-var csvurl = process.env.CSV;
-
 //Start Server
 var serv = app.listen(port, function(){
   console.log('App listening on port %s', serv.address().port);
@@ -67,8 +65,11 @@ var serv = app.listen(port, function(){
 
   app.use(bodyParser.json());
 
-  app.get('/', function(err, response){
-
+  app.post('/', function(req, res){
+    const body = req.body.Body;
+    console.log(body);
+    res.set('Content-Type', 'text/plain');
+    res.send(`You sent: ${body} to gotProperties-Rent.com`);
   });
 
 });
@@ -91,23 +92,6 @@ var establishProxy = function(callback){
 //FUNCTION ----> Run an INSERT STATEMNET/DATABASE READ
 var testQuery = function(callback){
   establishProxy(function(mysql_options){
-    var mysqlConn = mysql2.createConnection(mysql_options);
-    var arr;
-    return mysqlConn.connect(function(err){
-      if(err){console.log(err);}
-      else{
-        console.log('\n\nDatabase Connected!');
-        var t = new Date();
-        var tf = t.toString("MMM/DD/yy   hh:mm: aa");
-        console.log('TIME: ', t.toString("hh:mm: aa"));
-        console.log(tf);
-
-        console.log('\n\nInitial Query...\n');
-        callback(mysqlConn.query('SELECT COUNT(DISTINCT(work_order)) AS WorkOrders, COUNT(work_order) AS PhotoFiles FROM progress_photos2;', function(err, rows){
-          if(err) return console.log(err);
-          console.log('Result: ', rows);
-        }));
-      }
-    })
+    return;
   });
 }

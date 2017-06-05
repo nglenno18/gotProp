@@ -6,10 +6,8 @@ const port = process.env.PORT || 3001;
 var express = require('express');
 var bodyParser = require('body-parser');
 
-
-
 var records = [];
-require('./config/config.js');
+// require('./config/config.js');
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
@@ -35,23 +33,23 @@ var url = require('url');
 
 var SocksConnection = require('socksjs');
 var options, proxy;
-proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL); // <-- proxy url
-var username = proxy.auth.split(':')[0];
-var password = proxy.auth.split(':')[1];
+// proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL); // <-- proxy url
+// var username = proxy.auth.split(':')[0];
+// var password = proxy.auth.split(':')[1];
 
 var SocksConnection = require('socksjs');
-
-var mysql_server_options = {
-  host: process.env.HOST,
-  port: process.env.PORTE
-};
-
-var socks_options = {
-  host: proxy.hostname,
-  port: 1080,
-  user: username,
-  pass: password
-};
+//
+// var mysql_server_options = {
+//   host: process.env.HOST,
+//   port: process.env.PORTE
+// };
+//
+// var socks_options = {
+//   host: proxy.hostname,
+//   port: 1080,
+//   user: username,
+//   pass: password
+// };
 
 //Start Server
 var serv = app.listen(port, function(){
@@ -80,28 +78,19 @@ var serv = app.listen(port, function(){
   app.get('/', function(err, res){
     res.status(200).send(`${records}`);
   });
-
-
 });
 
 //--------------------------mySQL-----------------------//
 //ESTABLISH proxy
-var establishProxy = function(callback){
-  var socksConn = new SocksConnection(mysql_server_options, socks_options);
-
-  // console.log(socksConn);
-  var mysql_options =  {
-    database: process.env.DB,
-    user: process.env.US,
-    password: process.env.PW,
-    stream: socksConn
-  }
-  callback(mysql_options);
-}
-
-//FUNCTION ----> Run an INSERT STATEMNET/DATABASE READ
-var testQuery = function(callback){
-  establishProxy(function(mysql_options){
-    return;
-  });
-}
+// var establishProxy = function(callback){
+//   var socksConn = new SocksConnection(mysql_server_options, socks_options);
+//
+//   // console.log(socksConn);
+//   var mysql_options =  {
+//     database: process.env.DB,
+//     user: process.env.US,
+//     password: process.env.PW,
+//     stream: socksConn
+//   }
+//   callback(mysql_options);
+// }

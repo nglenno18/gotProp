@@ -73,7 +73,8 @@ var serv = app.listen(port, function(){
   });
 
   app.get('/records', function(err, res){
-    res.status(200).send(`${records}`);
+    console.log(records);
+    res.status(200).send(`These are all requests so far: ${records}`);
   });
   app.get('/', function(err, res){
     res.status(200).send(`${records}`);

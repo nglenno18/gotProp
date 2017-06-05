@@ -66,10 +66,10 @@ var serv = app.listen(port, function(){
   app.use(bodyParser.json());
   app.post('/posting', function(req, res){
     var body = req.body.Body;
-    records.push(body.Property);
+    records.push(body);
     // console.log(body);
     // res.set('Content-Type', 'text/plain');
-    res.send(`You sent: ${body} to gotProperties-Rent.com`);
+    res.send(`You sent: ${req.body.Body} to gotProperties-Rent.com`);
   });
 
   app.get('/records', function(err, res){

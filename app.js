@@ -70,7 +70,7 @@ var serv = app.listen(port, function(){
     var body = JSON.parse(JSON.stringify(res.req.body.Payload));
     records.push(body);
     console.log(body);
-    res.set('Content-Type', 'application/json');
+    // res.set('Content-Type', 'application/json');
     res.send(`${body}`);
   });
   app.get('/records', function(err, res){

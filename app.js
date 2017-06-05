@@ -66,7 +66,7 @@ var serv = app.listen(port, function(){
   app.use(bodyParser.json());
   app.post('/posting', function(req, res){
     var body = req.body.Body;
-    records.push(body);
+    records.push(req.body);
     // console.log(body);
     // res.set('Content-Type', 'text/plain');
     res.send(`You sent: ${req.body.Body} to gotProperties-Rent.com`);

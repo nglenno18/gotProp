@@ -6,7 +6,6 @@ const port = process.env.PORT || 3002;
 var express = require('express');
 var bodyParser = require('body-parser');
 
-
 var errors = [];
 var records = [];
 require('./config/config.js');
@@ -43,7 +42,7 @@ var SocksConnection = require('socksjs');
 
 var mysql_server_options = {
   host: process.env.HOST,
-  port: process.env.PORTE
+  port: process.env.PT
 };
 
 var socks_options = {
@@ -53,6 +52,21 @@ var socks_options = {
   pass: password
 };
 
+var target = url.parse('http://ip.jsontest.com/');
+options = {
+  hostname: proxy.hostname,
+  port: proxy.port || 80,
+  path: target.href,
+  headers:{
+    "Proxy-Authorization":"Basic " + (new Buffer(proxy.auth).toString("base64")),
+    "Host": target.hostname
+  }
+};
+http.get(options,function(res){
+  console.log(options);
+  res.pipe(process.stdout);
+  return console.log("status code", res.statusCode);
+})
 //Start Server
 var serv = app.listen(port, function(){
   console.log('App listening on port %s', serv.address().port);

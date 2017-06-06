@@ -89,7 +89,7 @@ var serv = app.listen(port, function(){
       // return connection.end();
     });
     // res.set('Accept', '')
-    response.set('Content-Type', 'application/json');
+    // response.set('Content-Type', 'application/json');
     response.send(response.req.body);
 
   });
@@ -154,6 +154,7 @@ var testQuery = function(param, callback){
 
 var addRentRow = function(entry, callback){
   var array = [];
+  console.log('\n\nADDING RENT ROW:\n\n');
   var payload = JSON.parse(entry.Payload);
   console.log('\n\n Entry : ', payload.Property);
 

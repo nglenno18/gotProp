@@ -2,7 +2,7 @@ const path = require('path');
 const http = require('http');
 const socketIO = require('socket.io');
 const publicPath = path.join(__dirname, '../public');
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3002;
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -67,11 +67,16 @@ var serv = app.listen(port, function(){
 
   app.use(bodyParser.json());
   app.post('/posting', function(req, res){
-    var body = JSON.parse(JSON.stringify(res.req.body.Payload));
-    records.push(body);
-    console.log(body);
-    // res.set('Content-Type', 'application/json');
-    res.send(`${body}`);
+    // var body = JSON.parse(JSON.stringify(res.req.body.Payload));
+    var body = res.req.body.Payload;
+    // var body = res.req;
+    // records.push(body);
+    // console.log(body);
+    var txt = body.toString();
+    var js = JSON.parse(txt);
+    console.log(js.UpdateMode);
+    res.set('Content-Type', 'application/json');
+    res.send(js.Data);
   });
   app.get('/records', function(err, res){
     res.status(200).send(`${records}`);

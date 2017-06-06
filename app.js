@@ -70,19 +70,21 @@ var serv = app.listen(port, function(){
     // var body = JSON.parse(JSON.stringify(res.req.body.Payload));
     var body = res.req.body.Payload;
     // var body = res.req;
-    // records.push(body);
+
     // console.log(body);
     var txt = body.toString();
     var js = JSON.parse(txt);
-    console.log(js.UpdateMode);
+    var d = js.Data;
+    // console.log(js.UpdateMode);
+    records.push(d);
     res.set('Content-Type', 'application/json');
-    res.send(js.Data);
+    res.send(d);
   });
   app.get('/records', function(err, res){
     res.status(200).send(`${records}`);
   });
 
-
+/////////////////////SEND a webhook -- >< Entire Table?? Offer export
 
 });
 

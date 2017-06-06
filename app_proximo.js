@@ -42,6 +42,24 @@ var mysql_server_options = {
 };
 const connection = mysql2.createConnection(mysql_server_options);
 
+
+var proxy = url.parse(process.env.PROXIMO_URL);
+var target = url.parse('http://ip.jsontest.com/');
+
+options = {
+  hostname: proxy.hostname,
+  port: proxy.port || 80,
+  path: target.href,
+  headers:{
+    "Proxy-Authorization":"Basic " + (new Buffer(proxy.auth).toString("base64")),
+    "Host": target.hostname
+  }
+};
+http.get(options,function(res){
+  console.log(options);
+  res.pipe(process.stdout);
+  return console.log("status code", res.statusCode);
+})
 //Start Server
 var serv = app.listen(port, function(){
   console.log('App listening on port %s', serv.address().port);
@@ -181,4 +199,19 @@ var generateID = function (len) {
     return crypto.randomBytes(Math.ceil(len/2))
         .toString('hex') // convert to hexadecimal format
         .slice(0,len);   // return required number of characters
+}
+
+var establishProxy = function(callback){
+  // var socksConn = new SocksConnection(mysql_server_options, socks_options);
+
+
+
+  // console.log(socksConn);
+  var mysql_options =  {
+    database: process.env.DB,
+    user: process.env.US,
+    password: process.env.PW,
+    stream: socksConn
+  }
+  callback(mysql_options);
 }

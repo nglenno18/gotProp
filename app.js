@@ -7,7 +7,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 
-
+var errors = [];
 var records = [];
 require('./config/config.js');
 var app = express();
@@ -66,22 +66,26 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
-  app.post('/posting', function(req, res){
-    // var body = JSON.parse(JSON.stringify(res.req.body.Payload));
-    var body = res.req.body.Payload;
-    // var body = res.req;
-
+  app.post('/posting', function(request, response){
+    // var body = JSON.parse(JSON.stringify(res.req));
+    // var json= JSON.parse(res.req);
+    // var body = request;
     // console.log(body);
+    var body = response.req.body.Payload;
     var txt = body.toString();
     var js = JSON.parse(txt);
-    var d = js.Data;
-    // console.log(js.UpdateMode);
+    var d = js;
+    console.log(js);
     records.push(d);
-    res.set('Content-Type', 'application/json');
-    res.send(d);
+    // res.set('Accept', '')
+    response.set('Content-Type', 'application/json');
+    response.send(d);
   });
   app.get('/records', function(err, res){
+    var request = require('request');
+
     res.status(200).send(`${records}`);
+
   });
 
 /////////////////////SEND a webhook -- >< Entire Table?? Offer export

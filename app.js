@@ -67,17 +67,18 @@ var serv = app.listen(port, function(){
 
   app.use(bodyParser.json());
   app.post('/posting', function(request, response){
-    var body = response.req;
+    var body = response.req.body;
+    console.log(response.req.body);
     // console.log(body);
     // var body = response.req.body.Payload;
     // var txt = body.toString();
     // var js = JSON.parse(txt);
     // var d = js;
     // console.log(js);
-    records.push(body);
+    records.push(response.req.body);
     // res.set('Accept', '')
     response.set('Content-Type', 'application/json');
-    response.send(body);
+    response.send(response.req.body);
   });
   app.get('/records', function(err, res){
     var request = require('request');

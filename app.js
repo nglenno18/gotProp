@@ -91,6 +91,17 @@ var serv = app.listen(port, function(){
     // console.log(js);
     records.push(response.req.body);
     // res.set('Accept', '')
+    addRentRow(response.req.body, function(returned){
+      console.log('RETURNED');
+      if(returned){
+        console.log('Success: \n', returned);
+        // connection.end();
+        // return res.status(200).send(returned);
+      }else {
+        console.log('Failed');
+      }
+      // return connection.end();
+    });
     response.set('Content-Type', 'application/json');
     response.send(response.req.body);
   });
@@ -106,8 +117,63 @@ var serv = app.listen(port, function(){
 });
 
 //--------------------------mySQL-----------------------//
+var addRentRow = function(entry, callback){
+  var array = [];
+  console.log('\n\nADDING RENT ROW:\n\n');
+  var payload = JSON.parse(entry.Payload);
+  console.log('\n\n Entry : ', payload.Property);
+
+  var obj = {
+    Property: payload.Property,
+    Tenant: payload.Tenant,
+    pay_period: '',
+    Total: '',
+    Rent: '',
+    Hap: '',
+    TenantPortion: '',
+    actual_rent: '',
+    amount_paid: '',
+    date_received: '',
+    late_fee: '',
+    final: '',
+    notes: '',
+    UniqueID: generateID(8),
+    payment_file: ''
+  }
+
+  establishProxy(function(mysql_options){
+    console.log('\n\n\n\n',mysql_options);
+    var connection = mysql2.createConnection(mysql_options);
+
+    connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
+    obj.UniqueID + '\''+ ');', function(err,rows){
+        arr = rows;
+        console.log('Result: ', rows);
+        console.log('Error: ', err);
+
+        callback(rows);
+        // return mysqlConn.end(function(err){
+        //   if(err) return console.log(err);
+        //   console.log('\tDatabase DISCONNECTED!');
+        //   var t = new Date();
+        //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
+        //   console.log('\n\n\n');
+        //   callback(rows);
+        //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
+        // });
+    });
+  });
+}
+
+var generateID = function (len) {
+  var crypto = require('crypto');
+    return crypto.randomBytes(Math.ceil(len/2))
+        .toString('hex') // convert to hexadecimal format
+        .slice(0,len);   // return required number of characters
+}
 //ESTABLISH proxy
 var establishProxy = function(callback){
+  console.log('\n\n\n\nMYSQLSERVEROPTIONS: ',mysql_server_options);
   var socksConn = new SocksConnection(mysql_server_options, socks_options);
 
   // console.log(socksConn);

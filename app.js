@@ -91,7 +91,16 @@ var serv = app.listen(port, function(){
     // console.log(js);
     records.push(response.req.body);
     // res.set('Accept', '')
-    addRentRow(response.req.body, function(returned){
+    // var b = response.req.body.toString().valueOf().replace(/[^\x00-\x7F]/g, "");
+    var b = response.req.body.Payload;
+    // console.log(b);
+    // var objDef = {
+    //   b
+    // }
+    // Object.prototype.test = 0;
+    // b = Object.create(b, objDef);
+    console.log(b);
+    addRentRow(b, function(returned){
       console.log('RETURNED');
       if(returned){
         console.log('Success: \n', returned);
@@ -102,7 +111,7 @@ var serv = app.listen(port, function(){
       }
       // return connection.end();
     });
-    response.set('Content-Type', 'application/json');
+    // response.set('Content-Type', 'application/json');
     response.send(response.req.body);
   });
   app.get('/records', function(err, res){
@@ -119,8 +128,14 @@ var serv = app.listen(port, function(){
 //--------------------------mySQL-----------------------//
 var addRentRow = function(entry, callback){
   var array = [];
-  console.log('\n\nADDING RENT ROW:\n\n');
-  var payload = JSON.parse(entry.Payload);
+  console.log('\n\nADDING RENT ROW:\n\n', entry);
+  entry = JSON.stringify(JSON.parse(entry));
+  // entry = JSON.stringify(entry, undefined, 2);
+
+  console.log('JSON STRINGIFY: \n', entry);
+
+  var payload = JSON.parse(entry);
+
   console.log('\n\n Entry : ', payload.Property);
 
   var obj = {

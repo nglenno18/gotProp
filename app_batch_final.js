@@ -89,17 +89,17 @@ var serv = app.listen(port, function(){
       console.log('List of Properties', list);
       var t = 0;
       for(t = 0; t < list.length; t++){
-        // addRentRow(list[t], function(returned){
-        //   console.log('RETURNED');
-        //   if(returned){
-        //     console.log('Success: \n', returned);
-        //     // connection.end();
-        //     // return res.status(200).send(returned);
-        //   }else {
-        //     console.log('Failed');
-        //   }
-        //   // return connection.end();
-        // });
+        addRentRow(list[t], function(returned){
+          console.log('RETURNED');
+          if(returned){
+            console.log('Success: \n', returned);
+            // connection.end();
+            // return res.status(200).send(returned);
+          }else {
+            console.log('Failed');
+          }
+          // return connection.end();
+        });
       }
     });
 

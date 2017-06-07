@@ -111,7 +111,7 @@ var serv = app.listen(port, function(){
       }
       // return connection.end();
     });
-    response.set('Content-Type', 'application/json');
+    // response.set('Content-Type', 'application/json');
     response.send(response.req.body);
   });
   app.get('/records', function(err, res){

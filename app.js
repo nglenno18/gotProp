@@ -141,28 +141,33 @@ var addRentRow = function(entry, callback){
     payment_file: ''
   }
 
-  establishProxy(function(mysql_options){
-    console.log('\n\n\n\n',mysql_options);
-    var connection = mysql2.createConnection(mysql_options);
+  try {
+    establishProxy(function(mysql_options){
+      console.log('\n\n\n\n',mysql_options);
+      var connection = mysql2.createConnection(mysql_options);
 
-    connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
-    obj.UniqueID + '\''+ ');', function(err,rows){
-        arr = rows;
-        console.log('Result: ', rows);
-        console.log('Error: ', err);
+      connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
+      obj.UniqueID + '\''+ ');', function(err,rows){
+          arr = rows;
+          console.log('Result: ', rows);
+          console.log('Error: ', err);
 
-        callback(rows);
-        // return mysqlConn.end(function(err){
-        //   if(err) return console.log(err);
-        //   console.log('\tDatabase DISCONNECTED!');
-        //   var t = new Date();
-        //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
-        //   console.log('\n\n\n');
-        //   callback(rows);
-        //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
-        // });
+          callback(rows);
+          // return mysqlConn.end(function(err){
+          //   if(err) return console.log(err);
+          //   console.log('\tDatabase DISCONNECTED!');
+          //   var t = new Date();
+          //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
+          //   console.log('\n\n\n');
+          //   callback(rows);
+          //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
+          // });
+      });
     });
-  });
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
 }
 
 var generateID = function (len) {

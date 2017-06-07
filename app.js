@@ -133,7 +133,7 @@ var addRentRow = function(entry, callback){
   // entry = JSON.stringify(entry, undefined, 2);
 
   // console.log('JSON STRINGIFY: \n', entry);
-
+  console.log('Property    ', entry.Property);
   var payload = JSON.parse(entry);
 
   console.log('\n\n Entry : ', payload.Property);

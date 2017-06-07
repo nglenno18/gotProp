@@ -158,7 +158,7 @@ var addRentRow = function(entry, callback){
 
 
   establishProxy(function(mysql_options){
-    console.log('\n\n\n\n',mysql_options);
+    // console.log('\n\n\n\n',mysql_options);
     var connection = mysql2.createConnection(mysql_options);
     try {
       connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +

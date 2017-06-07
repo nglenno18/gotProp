@@ -129,10 +129,10 @@ var serv = app.listen(port, function(){
 var addRentRow = function(entry, callback){
   var array = [];
   console.log('\n\nADDING RENT ROW:\n\n', entry);
-  entry = JSON.stringify(JSON.parse(entry));
+  // entry = JSON.stringify(JSON.parse(entry));
   // entry = JSON.stringify(entry, undefined, 2);
 
-  console.log('JSON STRINGIFY: \n', entry);
+  // console.log('JSON STRINGIFY: \n', entry);
 
   var payload = JSON.parse(entry);
 

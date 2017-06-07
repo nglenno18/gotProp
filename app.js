@@ -82,7 +82,7 @@ var serv = app.listen(port, function(){
   app.use(bodyParser.json());
   app.post('/posting', function(request, response){
     var body = response.req.body;
-    console.log(response.req.body);
+    console.log('\n\n\nRESPONSEBODY: ',response.req.body);
     // console.log(body);
     // var body = response.req.body.Payload;
     // var txt = body.toString();

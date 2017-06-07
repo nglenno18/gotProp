@@ -141,11 +141,11 @@ var addRentRow = function(entry, callback){
     payment_file: ''
   }
 
-  try {
-    establishProxy(function(mysql_options){
-      console.log('\n\n\n\n',mysql_options);
-      var connection = mysql2.createConnection(mysql_options);
 
+  establishProxy(function(mysql_options){
+    console.log('\n\n\n\n',mysql_options);
+    var connection = mysql2.createConnection(mysql_options);
+    try {
       connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
       obj.UniqueID + '\''+ ');', function(err,rows){
           arr = rows;
@@ -163,11 +163,10 @@ var addRentRow = function(entry, callback){
           //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
           // });
       });
-    });
-  } catch (e) {
-    console.log(e);
-    return '';
-  }
+    } catch (e) {
+      console.log(e);
+    }
+  });
 }
 
 var generateID = function (len) {

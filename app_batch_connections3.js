@@ -15,6 +15,7 @@ var io = socketIO(server);
 var fs = require('fs');
 var previousLength = 0;
 var currentSQL = [];
+var dateformat = require('dateformat');
 
 var minute = new Date();
 console.log('\nSTARTED :', minute.toString("hh:mm tt"));
@@ -80,37 +81,28 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
-  app.post('/posting', function(request, response){
+  app.post('/newmonth', function(request, response){
     var body = response.req.body;
     console.log('\n\n\nRESPONSEBODY: ',response.req.body);
-    // console.log(body);
-    // var body = response.req.body.Payload;
-    // var txt = body.toString();
-    // var js = JSON.parse(txt);
-    // var d = js;
-    // console.log(js);
-    records.push(response.req.body);
-    // res.set('Accept', '')
-    // var b = response.req.body.toString().valueOf().replace(/[^\x00-\x7F]/g, "");
-    var b = response.req.body;
-    // console.log(b);
-    // var objDef = {
-    //   b
-    // }
-    // Object.prototype.test = 0;
-    // b = Object.create(b, objDef);
-    console.log(b);
-    addRentRow(b, function(returned){
-      console.log('RETURNED');
-      if(returned){
-        console.log('Success: \n', returned);
-        // connection.end();
-        // return res.status(200).send(returned);
-      }else {
-        console.log('Failed');
+
+    getProperties('rent', function(list){
+      console.log('List of Properties', list);
+      var t = 0;
+      for(t = 0; t < list.length; t++){
+        // addRentRow(list[t], function(returned){
+        //   console.log('RETURNED');
+        //   if(returned){
+        //     console.log('Success: \n', returned);
+        //     // connection.end();
+        //     // return res.status(200).send(returned);
+        //   }else {
+        //     console.log('Failed');
+        //   }
+        //   // return connection.end();
+        // });
       }
-      // return connection.end();
     });
+
     response.set('Content-Type', 'application/json');
     response.send(response.req.body);
   });
@@ -124,6 +116,46 @@ var serv = app.listen(port, function(){
 });
 
 //--------------------------mySQL-----------------------//
+var getProperties = function(param, callback){
+  var propertyList = [];
+
+  establishProxy(function(mysql_options){
+    var getPropertiesQueryConnection = mysql2.createConnection(mysql_options);
+    try {
+      getPropertiesQueryConnection.query(
+        'SELECT p.Property, p.Tenant, p.pay_period, r.pay_period FROM property p JOIN rent r ON (r.pay_period = \'' + dateformat("mmm, yyyy") + '\' AND r.Property = p.Property AND CONCAT(p.Property, \'-\', p.pay_period)= CONCAT(r.Property, \'-\', r.pay_period))',
+        function(err,rows){
+      // getPropertiesQueryConnection.query('SELECT Property, Tenant, pay_period FROM property;', function(err,rows){
+          arr = rows;
+          console.log('Result: ', rows);
+          console.log('Error: ', err);
+
+          var xy = 0;
+          for(xy=0;xy< rows.length; xy++){
+            // if(!rows[xy].pay_period){
+              console.log(rows[xy].Property);
+              rows[xy].pay_period = dateformat("mmm, yyyy");
+
+              propertyList.push(rows[xy]);
+            // }
+          }
+          // getPropertiesQueryConnection.close();
+          callback(propertyList);
+          // return mysqlConn.end(function(err){
+          //   if(err) return console.log(err);
+          //   console.log('\tDatabase DISCONNECTED!');
+          //   var t = new Date();
+          //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
+          //   console.log('\n\n\n');
+          //   callback(rows);
+          //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
+          // });
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  });
+}
 var addRentRow = function(entry, callback){
   var array = [];
   console.log('\n\nADDING RENT ROW:\n\n', entry);
@@ -139,7 +171,7 @@ var addRentRow = function(entry, callback){
   var obj = {
     Property: payload.Property,
     Tenant: payload.Tenant,
-    pay_period: payload.pp,
+    pay_period: payload.pay_period,
     Total: '',
     Rent: '',
     Hap: '',
@@ -159,12 +191,12 @@ var addRentRow = function(entry, callback){
     // console.log('\n\n\n\n',mysql_options);
     var connection = mysql2.createConnection(mysql_options);
     try {
-      connection.query('INSERT INTO rent(Property, Tenant, UniqueID) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
-      obj.UniqueID + '\''+ ');', function(err,rows){
+      connection.query('INSERT INTO rent(Property, Tenant, UniqueID, pay_period) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
+      obj.UniqueID + '\', \''+ obj.pay_period +'\');', function(err,rows){
           arr = rows;
           console.log('Result: ', rows);
           console.log('Error: ', err);
-
+          // connection.close();
           callback(rows);
           // return mysqlConn.end(function(err){
           //   if(err) return console.log(err);
@@ -177,7 +209,7 @@ var addRentRow = function(entry, callback){
           // });
       });
     } catch (e) {
-      console.log(e);
+      console.log('\n\naddRENTALROW ERROR: ', e);
     }
   });
 }

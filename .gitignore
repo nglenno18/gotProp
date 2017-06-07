@@ -3,3 +3,5 @@ config/config.json
 jsonTemplate.txt
 app_final.js
 jsonTemplate.txt
+app_batch_connections.js
+app_batch_connections2.js

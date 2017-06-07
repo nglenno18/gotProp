@@ -92,7 +92,7 @@ var serv = app.listen(port, function(){
     records.push(response.req.body);
     // res.set('Accept', '')
     // var b = response.req.body.toString().valueOf().replace(/[^\x00-\x7F]/g, "");
-    var b = response.req.body.Payload;
+    var b = response.req.body;
     // console.log(b);
     // var objDef = {
     //   b

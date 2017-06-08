@@ -127,11 +127,11 @@ var getProperties = function(param, callback){
 
       getPropertiesQueryConnection.on('error', function(err) {
         console.log('db error', err);
-        if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+        if(err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT') { // Connection to the MySQL server is usually
           console.log('Error with getProperties Query Connection\n', params, callback);
           getProperties(param, callback);             // lost due to either server restart, or a
-        } else {                                      // connnection idle timeout (the wait_timeout
-          throw err;                                  // server variable configures this)
+        }else {                                      // connnection idle timeout (the wait_timeout
+          return err;                                  // server variable configures this)
         }
       });
       getPropertiesQueryConnection.query(
@@ -202,9 +202,18 @@ var addRentRow = function(entry, callback){
 
 
   establishProxy(function(mysql_options){
-    // console.log('\n\n\n\n',mysql_options);
-    var connection = mysql2.createConnection(mysql_options);
     try {
+      var connection = mysql2.createConnection(mysql_options);
+
+      connection.on('error', function(err) {
+        console.log('db error', err);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+          console.log('Error with getProperties Query Connection\n', entry, callback);
+          addRentRow(entry, callback);             // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+          throw err;                                  // server variable configures this ADDRENTROW)
+        }
+      });
       connection.query('INSERT INTO rent(Property, Tenant, UniqueID, pay_period) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +
       obj.UniqueID + '\', \''+ obj.pay_period +'\');', function(err,rows){
           arr = rows;

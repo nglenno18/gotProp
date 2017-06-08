@@ -131,7 +131,7 @@ var getProperties = function(param, callback){
           console.log('Error with getProperties Query Connection\n');
           console.log('Param: ', param);
           console.log('Callback: ', callback);
-          getProperties(param, callback);             // lost due to either server restart, or a
+          // getProperties(param, callback);             // lost due to either server restart, or a
         }else {                                      // connnection idle timeout (the wait_timeout
           return err;                                  // server variable configures this)
         }
@@ -211,10 +211,12 @@ var addRentRow = function(entry, callback){
         console.log('db error', err);
         console.log('db error code: ', err.code);
         if(err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT') { // Connection to the MySQL server is usually
-          console.log('Error with getProperties Query Connection\n', entry, callback);
-          // addRentRow(entry, callback);                // lost due to either server restart, or a
+          console.log('Error with getProperties Query Connection\n', err.code);
+          console.log('Entry: ', entry)
+          console.log('Callback: ', callback);
+          addRentRow(entry, callback);                // lost due to either server restart, or a
         } else {                                      // connnection idle timeout (the wait_timeout
-          throw err;                                  // server variable configures this ADDRENTROW)
+          return err;                                  // server variable configures this ADDRENTROW)
         }
       });
       connection.query('INSERT INTO rent(Property, Tenant, UniqueID, pay_period) VALUES(\'' + obj.Property +'\', \'' + obj.Tenant +'\', \'' +

@@ -122,8 +122,18 @@ var getProperties = function(param, callback){
   var propertyList = [];
 
   establishProxy(function(mysql_options){
-    var getPropertiesQueryConnection = mysql2.createConnection(mysql_options);
     try {
+      var getPropertiesQueryConnection = mysql2.createConnection(mysql_options);
+
+      getPropertiesQueryConnection.on('error', function(err) {
+        console.log('db error', err);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+          console.log('Error with getProperties Query Connection\n', params, callback);
+          getProperties(param, callback);             // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+          throw err;                                  // server variable configures this)
+        }
+      });
       getPropertiesQueryConnection.query(
         // 'SELECT p.Property, p.Tenant, p.pay_period, r.pay_period FROM property p JOIN rent r ON (r.pay_period = \'' + dateformat("mmm, yyyy") + '\' AND r.Property = p.Property AND CONCAT(p.Property, \'-\', p.pay_period)= CONCAT(r.Property, \'-\', r.pay_period))',
         'SELECT DISTINCT(Property), Tenant, pay_period FROM property;',

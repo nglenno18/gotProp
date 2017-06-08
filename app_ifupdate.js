@@ -84,25 +84,27 @@ var serv = app.listen(port, function(){
   app.post('/newmonth', function(request, response){
     var body = response.req.body;
     console.log('\n\n\nRESPONSEBODY: ',response.req.body);
-
-    getProperties('rent', function(list){
-      console.log('List of Properties', list);
-      var t = 0;
-      for(t = 0; t < list.length; t++){
-        // addRentRow(list[t], function(returned){
-        //   console.log('RETURNED');
-        //   if(returned){
-        //     console.log('Success: \n', returned);
-        //     // connection.end();
-        //     // return res.status(200).send(returned);
-        //   }else {
-        //     console.log('Failed');
-        //   }
-        //   // return connection.end();
-        // });
-      }
-    });
-
+    try {
+      getProperties('rent', function(list){
+        console.log('List of Properties', list);
+        var t = 0;
+        for(t = 0; t < list.length; t++){
+          addRentRow(list[t], function(returned){
+            console.log('RETURNED');
+            if(returned){
+              console.log('Success: \n', returned);
+              // connection.end();
+              // return res.status(200).send(returned);
+            }else {
+              console.log('Failed');
+            }
+            // return connection.end();
+          });
+        }
+      });
+    } catch (e) {
+      console.log('\n\n\ngetProperties Function threw an Error: ', e);
+    }
     response.set('Content-Type', 'application/json');
     response.send(response.req.body);
   });
@@ -123,7 +125,8 @@ var getProperties = function(param, callback){
     var getPropertiesQueryConnection = mysql2.createConnection(mysql_options);
     try {
       getPropertiesQueryConnection.query(
-        'SELECT p.Property, p.Tenant, p.pay_period, r.pay_period FROM property p JOIN rent r ON (r.pay_period = \'' + dateformat("mmm, yyyy") + '\' AND r.Property = p.Property AND CONCAT(p.Property, \'-\', p.pay_period)= CONCAT(r.Property, \'-\', r.pay_period))',
+        // 'SELECT p.Property, p.Tenant, p.pay_period, r.pay_period FROM property p JOIN rent r ON (r.pay_period = \'' + dateformat("mmm, yyyy") + '\' AND r.Property = p.Property AND CONCAT(p.Property, \'-\', p.pay_period)= CONCAT(r.Property, \'-\', r.pay_period))',
+        'SELECT DISTINCT(Property), Tenant, pay_period FROM property;',
         function(err,rows){
       // getPropertiesQueryConnection.query('SELECT Property, Tenant, pay_period FROM property;', function(err,rows){
           arr = rows;
@@ -182,7 +185,8 @@ var addRentRow = function(entry, callback){
     late_fee: '',
     final: '',
     notes: '',
-    UniqueID: generateID(8),
+    // UniqueID: generateID(8),
+    UniqueID: payload.Property + '-' + payload.pay_period,
     payment_file: ''
   }
 

@@ -81,6 +81,84 @@ var serv = app.listen(port, function(){
   // });
 
   app.use(bodyParser.json());
+
+
+  app.post('/new2', function(request, response){
+    var mysql = require('mysql2'),
+    url = require('url'),
+    SocksConnection = require('socksjs');
+
+      var remote_options = {
+          host: process.env.HOST,
+          port: 3306
+      };
+
+      var proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL),
+          auth = proxy.auth,
+          username = auth.split(':')[0],
+          pass = auth.split(':')[1];
+
+      var sock_options = {
+          host: proxy.hostname,
+          port: 1080,
+          user: username,
+          pass: pass
+      };
+
+      var sockConn = new SocksConnection(remote_options, sock_options);
+      console.log('Socket connection ');
+      var mysqlPool = mysql.createPool({
+          user: process.env.US,
+          database: process.env.DB,
+          password: process.env.PW,
+          stream: sockConn
+      });
+      for (var i = 0; i<5; i++){
+
+          mysqlPool.getConnection(function(err, connection) {
+
+              var detailSql = "SELECT UniqueID, Property FROM rent;";
+              if (err){
+                  throw err;
+              }
+              connection.query(detailSql, function(err, detailRows, fields) {
+                  connection.release();
+                  console.log("detailSql="+detailSql);
+                  if (err){
+                      console.log("can't run query=" + detailSql +"\n Error="+err);
+                  }
+                  else{
+
+                      console.log(detailRows[0].id + " " +detailRows[0].name);
+
+                  }
+
+              });
+          }.bind(mysqlPool, i));
+
+      };
+      // var dbConnection = mysql.createConnection({
+      //     user: process.env.US,
+      //     database: process.env.DB,
+      //     password: process.env.PW,
+      //     stream: sockConn
+      // });
+      // for(let x=0; x<20; x++){
+      //   dbConnection.query('SELECT 1+1 as test1;', function(err, rows, fields) {
+      //       if (err) throw err;
+      //
+      //       console.log(x);
+      //       console.log('Result: ', rows);
+      //       sockConn.dispose();
+      //
+      //   });
+      // }
+
+      // dbConnection.end();
+
+  });
+
+
   app.post('/newmonth', function(request, response){
     var body = response.req.body;
     console.log('\n\n\nRESPONSEBODY: ',response.req.body);
@@ -88,19 +166,36 @@ var serv = app.listen(port, function(){
       getProperties('rent', function(list){
         console.log('List of Properties', list);
         var t = 0;
-        for(t = 0; t < list.length; t++){
-          addRentRow(list[t], function(returned){
-            console.log('RETURNED');
-            if(returned){
-              console.log('Success: \n', returned);
-              // connection.end();
-              // return res.status(200).send(returned);
-            }else {
-              console.log('Failed');
-            }
-            // return connection.end();
-          });
+        // for(t = 0; t < list.length; t++){
+          // addRentRow(list[t], function(returned){
+          //   console.log('RETURNED');
+          //   if(returned){
+          //     console.log('Success: \n', returned);
+          //     // connection.end();
+          //     // return res.status(200).send(returned);
+          //   }else {
+          //     console.log('Failed');
+          //   }
+          //   // return connection.end();
+          // });
+        // }
+        if(list.length < 1);{
+          return;
         }
+        addBatchRows(list, function(returned, list){
+          console.log('RETURNED');
+          if(returned && list){
+            console.log('Success: \n', returned);
+            updatePP(list, function(ret){
+              console.log('RETURNED FROM updating the Property pay_periods');
+            });
+            // connection.end();
+            // return res.status(200).send(returned);
+          }else {
+            console.log('Failed');
+          }
+          // return connection.end();
+        });
       });
     } catch (e) {
       console.log('\n\n\ngetProperties Function threw an Error: ', e);
@@ -122,6 +217,8 @@ var getProperties = function(param, callback){
   var propertyList = [];
 
   establishProxy(function(mysql_options){
+    var datemonth = dateformat(new Date(), "mmm, yyyy");
+    // datemonth.setMonth(datemonth.getMonth() -1);
     try {
       var getPropertiesQueryConnection = mysql2.createConnection(mysql_options);
 
@@ -138,7 +235,8 @@ var getProperties = function(param, callback){
       });
       getPropertiesQueryConnection.query(
         // 'SELECT p.Property, p.Tenant, p.pay_period, r.pay_period FROM property p JOIN rent r ON (r.pay_period = \'' + dateformat("mmm, yyyy") + '\' AND r.Property = p.Property AND CONCAT(p.Property, \'-\', p.pay_period)= CONCAT(r.Property, \'-\', r.pay_period))',
-        'SELECT DISTINCT(Property), Tenant, pay_period FROM property;',
+        // 'SELECT DISTINCT(Property), Tenant, pay_period FROM property;',
+        'SELECT DISTINCT(Property), pay_period FROM property WHERE pay_period != \'' +  datemonth + '\';',
         function(err,rows){
       // getPropertiesQueryConnection.query('SELECT Property, Tenant, pay_period FROM property;', function(err,rows){
           arr = rows;
@@ -232,6 +330,119 @@ var addRentRow = function(entry, callback){
 
           // connection.close();
           callback(rows);
+          // return mysqlConn.end(function(err){
+          //   if(err) return console.log(err);
+          //   console.log('\tDatabase DISCONNECTED!');
+          //   var t = new Date();
+          //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
+          //   console.log('\n\n\n');
+          //   callback(rows);
+          //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
+          // });
+      });
+    } catch (e) {
+      console.log('\n\naddRENTALROW ERROR: ', e);
+    }
+  });
+}
+
+var addBatchRows = function(array, callback){
+  var array2 = [];
+  console.log('\n\nADDING RENT ROWs:\n\n', array);
+  for(var x = 0; x< array.length; x++){
+  // for(var x = 0; x< 10; x++){
+    var entry = [];
+    entry.push(array[x].Property);
+    entry.push(array[x].pay_period);
+    array2.push(entry);
+  }
+
+  establishProxy(function(mysql_options){
+    try {
+      var connection = mysql2.createConnection(mysql_options);
+
+      connection.on('error', function(err) {
+        console.log('db error', err);
+        console.log('db error code: ', err.code);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT') { // Connection to the MySQL server is usually
+          console.log('Error with getProperties Query Connection\n', err.code);
+          console.log('Entry: ', entry)
+          console.log('Callback: ', callback);
+          // addRentRow(entry, callback);                // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+          return err;                                  // server variable configures this ADDRENTROW)
+        }
+      });
+      connection.query("INSERT INTO rent(Property, pay_period) VALUES ?", [array2],function(err,rows){
+          arr = rows;
+
+          if(err){
+            console.log('Error: ', err);
+            callback(err, '');
+          }else{
+            console.log('Result: ', rows);
+            callback(rows, array2);
+          }
+
+          // connection.close();
+          callback(rows, err);
+          // return mysqlConn.end(function(err){
+          //   if(err) return console.log(err);
+          //   console.log('\tDatabase DISCONNECTED!');
+          //   var t = new Date();
+          //   console.log('\t TIME: ', t.toString("hh:mm: tt"));
+          //   console.log('\n\n\n');
+          //   callback(rows);
+          //   //PERFECT --> now udemy, review how to config HEROKU env. variables to stuff?
+          // });
+      });
+    } catch (e) {
+      console.log('\n\naddRENTALROW ERROR: ', e);
+    }
+  });
+}
+
+
+var updatePP = function(array, callback){
+  var array2 = [];
+  var datet = dateformat(new Date(), "mmm, yyyy");
+  console.log('\n\nUPDATING Property PaymentPeriods for:\n\n', array);
+  for(var x = 0; x< array.length; x++){
+  // for(var x = 0; x< 10; x++){
+    var entry = [];
+    entry.push(array[x][0]);
+    // entry.push(array[x].pay_period);
+    array2.push(entry);
+  }
+
+  establishProxy(function(mysql_options){
+    try {
+      var connection = mysql2.createConnection(mysql_options);
+
+      connection.on('error', function(err) {
+        console.log('db error', err);
+        console.log('db error code: ', err.code);
+        if(err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT') { // Connection to the MySQL server is usually
+          console.log('Error with getProperties Query Connection\n', err.code);
+          console.log('Entry: ', entry)
+          console.log('Callback: ', callback);
+          // addRentRow(entry, callback);                // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+          return err;                                  // server variable configures this ADDRENTROW)
+        }
+      });
+      connection.query("UPDATE property SET pay_period = \'" + datet + "\';", function(err,rows){
+          arr = rows;
+
+          if(err){
+            console.log('Error: ', err);
+          }else{
+            console.log('Result: ', rows);
+            callback(rows, array2);
+          }
+
+          // connection.close();
+          callback(rows, err);
           // return mysqlConn.end(function(err){
           //   if(err) return console.log(err);
           //   console.log('\tDatabase DISCONNECTED!');
